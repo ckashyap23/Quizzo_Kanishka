@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/Quizzo_Kanishka/static/css/main.f8c28fc0.css",
+    "main.js": "/Quizzo_Kanishka/static/js/main.c04fa850.js",
+    "index.html": "/Quizzo_Kanishka/index.html",
+    "main.f8c28fc0.css.map": "/Quizzo_Kanishka/static/css/main.f8c28fc0.css.map",
+    "main.c04fa850.js.map": "/Quizzo_Kanishka/static/js/main.c04fa850.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.f8c28fc0.css",
+    "static/js/main.c04fa850.js"
+  ]
+}
