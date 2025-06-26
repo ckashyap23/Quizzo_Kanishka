@@ -138,7 +138,9 @@ const SettingsPage = ({ settings, onUpdateSettings }) => {
   const [formData, setFormData] = useState({
     apiKey: settings.apiKey || '',
     modelName: settings.modelName || '',
-    hobbies: settings.hobbies || ''
+    hobbies: settings.hobbies || '',
+    azureEndpoint: settings.azureEndpoint || '',
+    azureDeploymentName: settings.azureDeploymentName || ''
   });
 
   const handleInputChange = (field, value) => {
@@ -173,6 +175,16 @@ const SettingsPage = ({ settings, onUpdateSettings }) => {
             <InfoText>
               • API Key: Get from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2' }}>OpenAI Platform</a><br/>
               • Model Examples: <CodeBlock>gpt-3.5-turbo</CodeBlock>, <CodeBlock>gpt-4</CodeBlock>, <CodeBlock>gpt-4-turbo</CodeBlock>
+            </InfoText>
+          </div>
+
+          <div style={{ marginBottom: '15px' }}>
+            <strong>Azure OpenAI:</strong>
+            <InfoText>
+              • API Key: Get from your Azure OpenAI resource<br/>
+              • Endpoint: Your Azure OpenAI endpoint URL (e.g., https://your-resource.openai.azure.com)<br/>
+              • Deployment Name: Your model deployment name<br/>
+              • Model Examples: <CodeBlock>gpt-35-turbo</CodeBlock>, <CodeBlock>gpt-4</CodeBlock>, <CodeBlock>gpt-4-turbo</CodeBlock>
             </InfoText>
           </div>
 
@@ -219,6 +231,34 @@ const SettingsPage = ({ settings, onUpdateSettings }) => {
         </FormGroup>
 
         <FormGroup>
+          <Label htmlFor="azureEndpoint">Azure OpenAI Endpoint (Optional)</Label>
+          <Input
+            id="azureEndpoint"
+            type="url"
+            placeholder="https://your-resource.openai.azure.com"
+            value={formData.azureEndpoint}
+            onChange={(e) => handleInputChange('azureEndpoint', e.target.value)}
+          />
+          <ModelExamples>
+            Leave empty if not using Azure OpenAI
+          </ModelExamples>
+        </FormGroup>
+
+        <FormGroup>
+          <Label htmlFor="azureDeploymentName">Azure OpenAI Deployment Name (Optional)</Label>
+          <Input
+            id="azureDeploymentName"
+            type="text"
+            placeholder="gpt-35-turbo, gpt-4, etc."
+            value={formData.azureDeploymentName}
+            onChange={(e) => handleInputChange('azureDeploymentName', e.target.value)}
+          />
+          <ModelExamples>
+            Leave empty if not using Azure OpenAI
+          </ModelExamples>
+        </FormGroup>
+
+        <FormGroup>
           <Label htmlFor="hobbies">Your Interests & Hobbies (Optional)</Label>
           <TextArea
             id="hobbies"
@@ -229,13 +269,33 @@ const SettingsPage = ({ settings, onUpdateSettings }) => {
         </FormGroup>
 
         <div style={{ textAlign: 'center', marginTop: '30px' }}>
-          <Button onClick={handleSave} disabled={!formData.apiKey || !formData.modelName}>
+          <Button 
+            onClick={handleSave} 
+            disabled={
+              !formData.apiKey || 
+              !formData.modelName || 
+              (formData.azureEndpoint && !formData.azureDeploymentName)
+            }
+          >
             💾 Save Settings
           </Button>
           <BackButton onClick={handleBack}>
             ← Back to Home
           </BackButton>
         </div>
+
+        {formData.azureEndpoint && !formData.azureDeploymentName && (
+          <div style={{ 
+            background: '#fff3cd', 
+            border: '1px solid #ffeaa7', 
+            borderRadius: '10px', 
+            padding: '15px', 
+            marginTop: '20px',
+            color: '#856404'
+          }}>
+            ⚠️ Note: If you provide an Azure OpenAI endpoint, you must also provide a deployment name.
+          </div>
+        )}
       </Card>
     </Container>
   );

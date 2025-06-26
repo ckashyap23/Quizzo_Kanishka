@@ -240,11 +240,23 @@ const QuizPage = ({ settings, onGenerateTopics }) => {
       return;
     }
 
+    // If Azure endpoint is provided, deployment name is required
+    if (settings.azureEndpoint && !settings.azureDeploymentName) {
+      setError('Azure OpenAI deployment name is required when using Azure endpoint');
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
-      const llmService = new LLMService(settings.apiKey, settings.modelName);
+      const llmService = new LLMService(
+        settings.apiKey, 
+        settings.modelName, 
+        settings.azureEndpoint, 
+        settings.azureDeploymentName
+      );
       const questions = await llmService.generateQuestions(decodeURIComponent(topic), difficulty);
       setQuestions(questions);
       setCurrentQuestionIndex(0);

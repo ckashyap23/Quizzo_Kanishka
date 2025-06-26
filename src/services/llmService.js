@@ -1,9 +1,11 @@
 import axios from 'axios';
 
 export class LLMService {
-  constructor(apiKey, modelName) {
+  constructor(apiKey, modelName, azureEndpoint = null, azureDeploymentName = null) {
     this.apiKey = apiKey;
     this.modelName = modelName;
+    this.azureEndpoint = azureEndpoint;
+    this.azureDeploymentName = azureDeploymentName;
   }
 
   // Detect which LLM provider to use based on model name
@@ -11,6 +13,10 @@ export class LLMService {
     const model = this.modelName.toLowerCase();
     
     if (model.includes('gpt') || model.includes('openai')) {
+      // Check if Azure OpenAI is configured
+      if (this.azureEndpoint && this.azureDeploymentName) {
+        return 'azure-openai';
+      }
       return 'openai';
     } else if (model.includes('claude') || model.includes('anthropic')) {
       return 'anthropic';
@@ -30,6 +36,19 @@ export class LLMService {
     let requestData = {};
 
     switch (provider) {
+      case 'azure-openai':
+        headers['api-key'] = this.apiKey;
+        requestData = {
+          messages: [{ role: 'user', content: prompt }],
+          max_tokens: 1000,
+          temperature: 0.7
+        };
+        const azureUrl = `${this.azureEndpoint}/openai/deployments/${this.azureDeploymentName}/chat/completions?api-version=2025-01-01-preview`;
+        console.log('🔍 Azure OpenAI URL:', azureUrl);
+        console.log('🔍 Azure OpenAI Headers:', { ...headers, 'api-key': '***' });
+        console.log('🔍 Azure OpenAI Request Data:', requestData);
+        return await axios.post(azureUrl, requestData, { headers });
+
       case 'openai':
         headers['Authorization'] = `Bearer ${this.apiKey}`;
         requestData = {
@@ -70,6 +89,7 @@ export class LLMService {
 
   extractResponse(response, provider) {
     switch (provider) {
+      case 'azure-openai':
       case 'openai':
         return response.data.choices[0].message.content;
       
@@ -86,6 +106,12 @@ export class LLMService {
 
   async generateTopics(prompt) {
     const provider = this.getProvider();
+    console.log('🔍 Detected provider:', provider);
+    console.log('🔍 Azure config:', { 
+      endpoint: this.azureEndpoint, 
+      deploymentName: this.azureDeploymentName,
+      modelName: this.modelName 
+    });
     
     try {
       const response = await this.makeRequest(prompt, provider);
@@ -102,6 +128,13 @@ export class LLMService {
 
   async generateQuestions(topic, difficulty = 'medium') {
     const provider = this.getProvider();
+    console.log('🔍 Detected provider:', provider);
+    console.log('🔍 Azure config:', { 
+      endpoint: this.azureEndpoint, 
+      deploymentName: this.azureDeploymentName,
+      modelName: this.modelName 
+    });
+    
     const prompt = `Please provide 5 questions of ${difficulty} difficulty level on the topic "${topic}". For each question, provide 4 possible answers and also the correct answer. Please send in the response as:
 Question 1: [question text]
 Option 1: [option text]

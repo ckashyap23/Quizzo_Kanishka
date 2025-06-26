@@ -18,7 +18,9 @@ function App() {
     return saved ? JSON.parse(saved) : {
       apiKey: '',
       modelName: '',
-      hobbies: ''
+      hobbies: '',
+      azureEndpoint: '',
+      azureDeploymentName: ''
     };
   });
 
@@ -37,11 +39,22 @@ function App() {
       return;
     }
 
+    // If Azure endpoint is provided, deployment name is required
+    if (settings.azureEndpoint && !settings.azureDeploymentName) {
+      setError('Azure OpenAI deployment name is required when using Azure endpoint');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
-      const llmService = new LLMService(settings.apiKey, settings.modelName);
+      const llmService = new LLMService(
+        settings.apiKey, 
+        settings.modelName, 
+        settings.azureEndpoint, 
+        settings.azureDeploymentName
+      );
       const prompt = settings.hobbies 
         ? `Please provide 5 quiz topics based on these interests: ${settings.hobbies}. The topics need to be a little quirky and a little specific. For example, can be Street food in Kolkata and not just Food or Villians in the Avengers series and not just Comics.`
         : `Please provide 5 quiz topics. The topics need to be a little quirky and a little specific. For example, can be Street food in Kolkata and not just Food or Villians in the Avengers series and not just Comics.`;
